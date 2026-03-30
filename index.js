@@ -1,60 +1,42 @@
 require('dotenv').config();
+const express = require('express');
+const cors = require('cors');
 const connectDB = require('./src/config/db');
 
-// Modelleri içeri aktarıyoruz
-const Derslik = require('./src/models/Derslik');
-const Gozetmen = require('./src/models/Gozetmen');
-const Musaitlik = require('./src/models/Musaitlik');
-const Sinav = require('./src/models/Sinav');
+// Rota dosyalarını içeri aktar
+const derslikRoutes = require('./src/routes/derslikRoutes');
+const gozetmenRoutes = require('./src/routes/gozetmenRoutes');
+const musaitlikRoutes = require('./src/routes/musaitlikRoutes');
+const sinavRoutes = require('./src/routes/sinavRoutes');
 
-console.log("MongoDB'ye bağlanılmaya çalışılıyor...");
+// Veritabanına bağlan
+connectDB();
 
-connectDB().then(async () => {
-  console.log("Test Başarılı! Veritabanı bağlantısı dogrulandı.");
+const app = express();
 
-  try {
-    // Şemaları Compass'ta görebilmeniz için geçici bir Derslik (Sınıf) ve Gözetmen belgesi oluşturuyoruz.
+// Middleware'ler
+app.use(cors()); // Farklı domainlerden (örn. React, Vue) istek atılabilmesi için CORS aktif
+app.use(express.json()); // Gelen isteklerdeki JSON verilerini parse edebilmek için
+app.use(express.urlencoded({ extended: false }));
 
-    const varMi = await Derslik.findOne({ ad: 'Test Sınıfı - 101' });
+// Ana test rotası
+app.get('/', (req, res) => {
+  res.send('ExamOptim API Sunucusu Çalışıyor...');
+});
 
-    if (!varMi) {
-      // Örnek bir derslik oluştur
-      await Derslik.create({
-        ad: 'Test Sınıfı - 101',
-        kapasite: 30,
-        bina: 'A Blok',
-        yerlesimPlani: {
-          satirSayisi: 5,
-          sutunSayisi: 6,
-          siralar: [
-            { satir: 1, sutun: 1, durum: 'Aktif', kapasite: 1, oturmaAlanlari: [{ kisiSiraNo: 1 }] }
-          ]
-        }
-      });
-      console.log("--> MongoDB koleksiyonlarını (Collection) oluşturmak için örnek bir 'Derslik' kaydı eklendi!");
+// API rotalarını eşleştir
+app.use('/api/derslikler', derslikRoutes);
+app.use('/api/gozetmenler', gozetmenRoutes);
+app.use('/api/musaitlikler', musaitlikRoutes);
+app.use('/api/sinavlar', sinavRoutes);
 
-      // Örnek bir gözetmen oluştur
-      await Gozetmen.create({
-        ad: 'Ahmet',
-        soyad: 'Yılmaz',
-        sicilNo: '123456',
-        unvan: 'Arş. Gör.',
-        bolum: 'Bilgisayar Mühendisliği'
-      });
-      console.log("--> Örnek bir 'Gözetmen' kaydı eklendi!");
+// Kalan geçersiz rotalar için basit bir hata yakalayıcı (404)
+app.use((req, res, next) => {
+  res.status(404).json({ success: false, message: 'Geçersiz Endpoint / Route bulunamadı' });
+});
 
-    } else {
-      console.log("--> Örnek kayıtlar zaten mevcut. Artık MongoDB Compass üzerinde görebilirsiniz.");
-    }
+const PORT = process.env.PORT || 5001;
 
-  } catch (error) {
-    console.error("Örnek kayıt eklenirken hata oluştu:", error);
-  } finally {
-    console.log("İşlem tamamlandı, süreç kapatılıyor.");
-    setTimeout(() => process.exit(0), 1000);
-  }
-
-}).catch(err => {
-  console.error("Test Başarısız! Bağlantı kurulamadı.", err);
-  process.exit(1);
+app.listen(PORT, () => {
+  console.log(`Sunucu ${PORT} portunda başlatıldı. Mod: ${process.env.NODE_ENV || 'development'}`);
 });

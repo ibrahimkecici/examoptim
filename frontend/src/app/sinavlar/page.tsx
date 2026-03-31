@@ -1,3 +1,5 @@
+import Link from 'next/link';
+
 export default function SinavlarPage() {
   return (
     <div className="space-y-6 animate-in slide-in-from-bottom-4 duration-500">
@@ -6,9 +8,9 @@ export default function SinavlarPage() {
           <h2 className="text-3xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-rose-500 to-pink-600">Sınavlar</h2>
           <p className="text-gray-500">Yaklaşan ve planlanmış oturumları inceleyin</p>
         </div>
-        <button className="bg-rose-500 hover:bg-rose-600 text-white px-5 py-2.5 rounded-full font-medium transition-colors shadow-lg shadow-rose-200 dark:shadow-none flex items-center gap-2">
+        <Link href="/sinavlar/yeni" className="bg-rose-500 hover:bg-rose-600 text-white px-5 py-2.5 rounded-full font-medium transition-colors shadow-lg shadow-rose-200 dark:shadow-none flex items-center gap-2">
           <span>📅</span> Yeni Sınav Planla
-        </button>
+        </Link>
       </header>
 
       <div className="relative mt-8 rounded-3xl border border-gray-100 dark:border-gray-800 bg-white dark:bg-gray-800/50 p-8 shadow-sm overflow-hidden">
